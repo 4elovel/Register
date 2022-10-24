@@ -1,5 +1,11 @@
 ﻿#include <iostream>
 #include <string>
+#include "MD_5.h"
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
 
 using namespace std;
 
@@ -31,7 +37,7 @@ void reg_init() {
 	bool leaver;
 	bool run = true;
 	int choice;
-	string login="", password = "";
+	string login="", password = "", question = "", answer = "", u_answer = "";;
 	while (run)
 	{
 		system("CLS");
@@ -42,7 +48,7 @@ void reg_init() {
 		cin >> choice;
 		switch (choice)
 		{
-		case(1):
+		case(1): //Регістрація
 			system("CLS");
 			cout << "e - to return\n\n";
 
@@ -69,11 +75,127 @@ void reg_init() {
 					cout << "INVALID PASSWORD\n";
 					continue;
 				}
+
+				cout << "Write your question->\n";
+				cin >> question;
+				if (question == "e") {
+					leaver = true;
+					break;
+				}
+				
+				cout << "Write your answer->\n";
+				cin >> answer;
+				if (answer == "e") {
+					leaver = true;
+					break;
+				}
+
 				break;
 			}
 			if (leaver) continue;
-			cout << "SUCCESSFULLY\n";
-			run = false;
+			cout << " ACCOUNT SUCCESSFULLY REGISTERED\n";
+			Sleep(1000);
+			login = md5(login); //хеш логіна
+			password += login; //додавання солі
+			password = md5(password); //хеш пароля
+			answer = md5(answer);
+			//Запис в базу хеш логіна
+			//Запис в базу хеш пароля
+			//Запис в базу питання
+			//Запис в базу хеш відповіді
+			break;
+		case(2): //Вхід
+
+			system("CLS");
+			cout << "e - to return\n\n";
+
+			leaver = false;
+			while (true) {
+				cout << "Write your login->\n";
+				cin >> login;
+				if (login == "e") {
+					leaver = true;
+					break;
+				}
+
+				cout << "Write your password->\n";
+				cin >> password;
+				if (password == "e") {
+					leaver = true;
+					break;
+				}
+
+				//тут треба перевірити чи є в базі
+				if (login=="admin" && password=="admin")
+				{
+					cout << "LOG IN SUCCESSFUL\n";
+					run = false;
+					leaver = true;
+					Sleep(1000);
+					break;
+				} //
+				else 
+				{
+					cout << "LOG IN UNSUCCESSFUL\n";
+					cout << "WRONG LOGIN OR PASSWORD\n";
+					Sleep(1000);
+				}
+
+
+			}
+			if (leaver) continue;
+			break;
+		case(3): //відновлення
+
+			system("CLS");
+			cout << "e - to return\n\n";
+
+			leaver = false;
+			while (true) {
+				cout << "Write your login->\n";
+				cin >> login;
+				if (login == "e") {
+					leaver = true;
+					break;
+				}
+				//Перевірка чи є в базі
+				if (login == "admin") {
+					//витягуєм питання з бази
+					question = "A or B";
+					//витягуєм відповідь з бази
+					answer = "A";
+					cout << question << "\n";
+					cin >> u_answer;
+					if (u_answer == "e") {
+						leaver = true;
+						break;
+					}
+					if (answer == u_answer)
+					{
+						cout << "WELCOME\n";
+						cout << "Write your new password->\n";
+						cin >> password;
+						if (password == "e") {
+							leaver = true;
+							break;
+						}
+						//запис пароля в базу
+						cout << "PASSWORD SUCCESSFULLY SAVED\n";
+						leaver = true;
+						Sleep(1000);
+						break;
+					}
+					else
+					{
+						cout << "WRONG ANSWER\n";
+					}
+				}
+				else
+				{
+					cout << "WRONG LOGIN\n";
+				}
+			}
+			if (leaver) continue;
 			break;
 		default:
 			break;
@@ -84,4 +206,5 @@ void reg_init() {
 int main()
 {
 	reg_init();
+
 }
